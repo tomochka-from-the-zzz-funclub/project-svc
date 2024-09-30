@@ -95,13 +95,13 @@ $ pip install uv
 1. **Перейдите в корневую директорию проекта**
 
    ```bash
-   cd my_service
+   cd film-svc
    ```
 
 2. **Запустите сервер**
 
    ```bash
-   uvicorn main:app --reload
+   uv run fastapi dev
    ```
 
    > **Примечание:** Предполагается, что файл `main.py` с экземпляром приложения FastAPI находится в корневой директории и называется `main.py`.
@@ -125,7 +125,7 @@ $ pip install uv
 2. **Запустите gRPC сервер**
 
    ```bash
-   python server.py
+   uv run server.py
    ```
 
 ## Тестирование
@@ -133,7 +133,7 @@ $ pip install uv
 Запустите все тесты с помощью PyTest:
 
 ```bash
-pytest tests/
+uv run pytest tests
 ```
 
 ## Скрипты
@@ -154,7 +154,7 @@ pytest tests/
 
   Проверьте параметры подключения к базе данных в `configs/db_config.yaml` и убедитесь, что база данных настроена правильно.
 
-- **Кэш (Redis)**
+- **Redis**
 
   Настройки подключения к Redis находятся в `configs/cache_config.yaml`.
 
@@ -164,11 +164,11 @@ pytest tests/
 
 ## Авторы
 
-- [Ваше Имя](https://github.com/yourusername) – *Основной разработчик*
-
-## Лицензия
-
-Этот проект лицензируется под лицензией MIT – подробности см. в файле [LICENSE](LICENSE).
+- [Иван Березуцкий](https://t.me/fi7in) – *TeamLead, DevOps*
+- [Ярослав Ермаков](https://t.me/tasamayaroza) - *BackEnd Developer*
+- [Платон Лебедько](https://t.me/Platon_Leb) - *BackEnd Developer*
+- [Илья Иванов](https://t.me/Riter44) - *BackEnd Developer*
+- [Михаил Пирязев](https://t.me/managerofsnb) - *ML Engineer*
 
 ---
 
