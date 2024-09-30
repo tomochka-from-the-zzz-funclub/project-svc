@@ -8,7 +8,7 @@
 - **gRPC** для высокопроизводительного межсервисного взаимодействия.
 - **Kafka** для обмена сообщениями между сервисами.
 - **PostgreSQL** для хранения данных.
-- **Redis* для ускорения доступа к часто используемым данным.
+- **Redis** для ускорения доступа к часто используемым данным.
 
 ## Структура проекта
 
@@ -167,7 +167,7 @@ uv run pytest tests
 - [Иван Березуцкий](https://t.me/fi7in) – *TeamLead, DevOps*
 - [Ярослав Ермаков](https://t.me/tasamayaroza) - *BackEnd Developer*
 - [Платон Лебедько](https://t.me/Platon_Leb) - *BackEnd Developer*
-- [Илья Иванов](https://t.me/Riter44) - *BackEnd Developer*
+- [Илья Иванов](https://t.me/Riter44) - *ML Engineer*
 - [Михаил Пирязев](https://t.me/managerofsnb) - *ML Engineer*
 
 ---
