@@ -14,4 +14,4 @@ class FilmORM(Base):
     creation_date = Column(Date)
     file_link = Column(String(255))
 
-    genres = relationship("GenreORM", secondary=film_genres, back_populates="films")
+    genres = relationship("GenreORM", secondary=film_genres, back_populates="films", cascade="all, delete")
