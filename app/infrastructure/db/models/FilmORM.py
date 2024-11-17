@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, Date
 from sqlalchemy.orm import relationship
-from Base import Base
-from FilmGenres import film_genres
+
+from app.infrastructure.db.models.Base import Base
+from app.infrastructure.db.models.FilmGenres import film_genres
 
 
 class FilmORM(Base):

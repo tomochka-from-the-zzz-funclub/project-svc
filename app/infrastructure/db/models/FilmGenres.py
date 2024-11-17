@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, Table
-from Base import Base
+
+from app.infrastructure.db.models.Base import Base
 
 film_genres = Table(
     'film_genres',
