@@ -1,65 +1,94 @@
-import asyncio
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from typing import List
 
 from app.domain.models.Genre import Genre
-from app.infrastructure.db.CreateSession import AsyncSessionLocal
-from app.domain.repositories.FilmRepository import FilmRepository
-from app.domain.repositories.GenreRepository import GenreRepository
+from app.domain.models.Film import Film
 from app.use_cases.FilmService import FilmService
-from app.infrastructure.db.models.FilmORM import FilmORM
-from app.infrastructure.db.models.GenreORM import GenreORM
+from app.use_cases.GenreService import GenreService
+from app.infrastructure.db.CreateSession import get_session
 
+app = FastAPI()
 
-async def check_database_connection():
-    async with AsyncSessionLocal() as session:
-        try:
-            # Проверяем подключение к базе данных
-            if session.bind is None:
-                print("Ошибка: Не удалось подключиться к базе данных")
-                return
+@app.post("/genres/", response_model=Genre)
+async def create_genre(genre: Genre, session: AsyncSession = Depends(get_session)):
+    genre_service = GenreService(session)
+    genre_id = await genre_service.create_genre(genre)
+    return Genre(id=genre_id, name=genre.name)
 
-            print("Подключение к базе данных успешно установлено")
+@app.get("/genres/", response_model=List[Genre])
+async def get_all_genres(session: AsyncSession = Depends(get_session)):
+    genre_service = GenreService(session)
+    genres = await genre_service.get_all_genres()
+    return genres
 
-            # Создаем репозитории
-            film_repo = FilmRepository(session)
-            genre_repo = GenreRepository(session)
+@app.get("/genres/{genre_name}", response_model=Genre)
+async def get_genre_by_name(genre_name: str, session: AsyncSession = Depends(get_session)):
+    genre_service = GenreService(session)
+    genre = await genre_service.get_genre_by_name(genre_name)
+    return genre
 
-            # Создаем сервис для работы с фильмами и жанрами
-            film_service = FilmService(film_repo, genre_repo)
+@app.put("/genres/{genre_name}", response_model=Genre)
+async def update_genre(genre_name: str, updated_genre: Genre, session: AsyncSession = Depends(get_session)):
+    genre_service = GenreService(session)
+    updated = await genre_service.update_genre(genre_name, updated_genre)
+    return updated
 
-            # Добавляем тестовые данные
-            test_film_title = "Test Film"
-            test_genre_name = Genre(name="Test Genre")
+@app.delete("/genres/{genre_name}", status_code=204)
+async def delete_genre(genre_name: str, session: AsyncSession = Depends(get_session)):
+    genre_service = GenreService(session)
+    await genre_service.delete_genre(genre_name)
+    return {"message": "Genre deleted successfully"}
 
-            # Создаем жанр
-            genre = await genre_repo.add_genre(test_genre_name)
-            print(f"Создан жанр: {genre.name}")
+# Роуты для работы с фильмами
 
-            # Создаем фильм
-            film = await film_service.create_film(
-                title=test_film_title,
-                description="A test film description",
-                creation_date="2024-01-01",
-                file_link="http://example.com/test.mp4"
-            )
-            print(f"Создан фильм: {film.title}")
+@app.post("/films/", response_model=Film)
+async def create_film(film: Film, genres_name: List[str], session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    film_id = await film_service.create_film(film, genres_name)
+    return Film(id=film_id, title=film.title, description=film.description, creation_date=film.creation_date, file_link=film.file_link)
 
+@app.get("/films/", response_model=List[Film])
+async def get_all_films(session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    films = await film_service.get_all_films()
+    return films
 
-            # # Присваиваем жанр фильму
-            # updated_film = await film_service.assign_genre_to_film(film_title=test_film_title,
-            #                                                        genre_name=test_genre_name)
-            # print(f"Жанр '{test_genre_name}' присвоен фильму '{test_film_title}'")
-            #
-            # # Проверяем получение всех фильмов
-            # films = await film_repo.find_all()
-            # print(f"Количество фильмов в базе: {len(films)}")
-            #
-            # # Удаляем тестовые данные, чтобы не оставлять следов
-            # await session.delete(await session.get(FilmORM, film.id))
-            # await session.delete(await session.get(GenreORM, genre.id))
-            # await session.commit()
-            # print("Тестовые данные успешно удалены")
+@app.get("/films/{film_name}", response_model=Film)
+async def get_film_data(film_name: str, session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    film = await film_service.get_film_data(film_name)
+    if not film:
+        raise HTTPException(status_code=404, detail="Film not found")
+    return film
 
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
+@app.put("/films/{film_name}", response_model=Film)
+async def update_film(film_name: str, updated_film: Film, session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    updated = await film_service.update_film(film_name, updated_film)
+    return updated
 
+@app.delete("/films/{film_name}", status_code=204)
+async def delete_film(film_name: str, session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    await film_service.delete_film(film_name)
+    return {"message": "Film deleted successfully"}
 
+@app.post("/films/{film_name}/genres/")
+async def add_genres_to_film(film_name: str, genres_name: List[str], session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    await film_service.add_genres_to_film(film_name, genres_name)
+    return {"message": "Genres added successfully"}
+
+@app.delete("/films/{film_name}/genres/")
+async def remove_genres_from_film(film_name: str, genres_name: List[str], session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    await film_service.delete_genres_from_film(film_name, genres_name)
+    return {"message": "Genres removed successfully"}
+
+@app.get("/films/genre/{genre_name}", response_model=List[Film])
+async def get_films_by_genre(genre_name: str, session: AsyncSession = Depends(get_session)):
+    film_service = FilmService(session)
+    films = await film_service.get_films_by_genre_name(genre_name)
+    return films

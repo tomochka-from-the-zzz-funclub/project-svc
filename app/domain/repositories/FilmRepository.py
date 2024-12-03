@@ -11,17 +11,17 @@ class FilmRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_film(self, film: Film) -> FilmORM:
+    async def add_film(self, film: Film) -> int:
         """
         Создание нового фильма в базе данных.
 
         :param film: Объект Film, содержащий данные о фильме.
-        :return: Объект FilmORM, представляющий созданный фильм.
+        :return: ID созданного фильма.
         """
         try:
             existing_film = await self.get_film_by_title(film.title)
             if existing_film:
-                return existing_film
+                return existing_film.id
 
             # Создание фильма
             film_orm = FilmORM(
@@ -35,7 +35,7 @@ class FilmRepository:
             await self.session.commit()
             await self.session.refresh(film_orm)
 
-            return film_orm
+            return film_orm.id
 
         except IntegrityError:
             await self.session.rollback()
@@ -48,7 +48,6 @@ class FilmRepository:
 
         :param film_id: ID фильма, который нужно найти.
         :return: FilmORM — объект фильма, если найден, или None.
-        :raises ValueError: Если фильм с указанным ID не найден.
         """
         result = await self.session.execute(select(FilmORM).filter_by(id=film_id))
         film_orm = result.scalars().first()
@@ -56,9 +55,7 @@ class FilmRepository:
         if film_orm:
             return film_orm
 
-        raise ValueError(
-            f"Фильм с ID '{film_id}' не найден. Проверьте правильность ID или добавьте новый фильм."
-        )
+        return None
 
     async def get_films_by_ids(self, film_ids: List[int]) -> List[FilmORM]:
         """
@@ -86,7 +83,6 @@ class FilmRepository:
 
         :param title: str — Название фильма.
         :return: FilmORM — объект фильма, если найден.
-        :raises ValueError: Если фильм с указанным названием не найден.
         """
         result = await self.session.execute(select(FilmORM).filter_by(title=title))
         film_orm = result.scalars().first()
@@ -94,9 +90,7 @@ class FilmRepository:
         if film_orm:
             return film_orm
 
-        raise ValueError(
-            f"Фильм с названием '{title}' не найден. Проверьте правильность названия или добавьте новый фильм."
-        )
+        return None
 
     async def update_film(self, film_id: int, updated_film: Film) -> Optional[FilmORM]:
         """

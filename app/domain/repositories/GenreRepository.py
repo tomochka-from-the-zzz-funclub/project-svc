@@ -11,7 +11,7 @@ class GenreRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_genre(self, genre: Genre) -> GenreORM:
+    async def add_genre(self, genre: Genre) -> int:
         """
         Добавление нового жанра в базу данных, если он еще не существует.
 
@@ -21,7 +21,7 @@ class GenreRepository:
         try:
             existing_genre = await self.get_genre_by_name(genre.name)
             if existing_genre:
-                return existing_genre
+                return existing_genre.id
 
             genre_orm = GenreORM(name=genre.name)
 
@@ -29,7 +29,7 @@ class GenreRepository:
             await self.session.commit()
             await self.session.refresh(genre_orm)
 
-            return genre_orm
+            return genre_orm.id
 
         except IntegrityError:
             await self.session.rollback()
@@ -41,7 +41,6 @@ class GenreRepository:
 
         :param genre_id: int — ID жанра.
         :return: GenreORM или None — объект жанра, если найден, иначе None.
-        :raises ValueError: Если жанр с указанным ID не найден.
         """
         result = await self.session.execute(select(GenreORM).filter_by(id=genre_id))
         genre_orm = result.scalars().first()
@@ -49,11 +48,7 @@ class GenreRepository:
         if genre_orm:
             return genre_orm
 
-        raise ValueError(
-            f"Жанр с ID {genre_id} не найден в базе данных. "
-            f"Убедитесь, что вы указали корректный ID жанра. "
-            f"Если жанр отсутствует, его нужно создать перед использованием."
-        )
+        return None
 
     async def get_genres_by_ids(self, genre_ids: List[int]) -> List[GenreORM]:
         """

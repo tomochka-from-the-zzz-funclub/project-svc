@@ -30,3 +30,4 @@ loguru==0.6.0
 python-dotenv==1.0.0  # for environment variables management
 
 pydantic-settings~=2.6.1
+alembic~=1.14.0
