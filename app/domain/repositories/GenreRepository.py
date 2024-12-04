@@ -103,7 +103,7 @@ class GenreRepository:
 
         return None
 
-    async def delete_genre(self, genre_id: int) -> Optional[GenreORM]:
+    async def delete_genre(self, genre_id: int) -> None:
         """
         Удаление жанра по ID.
 
@@ -115,7 +115,3 @@ class GenreRepository:
         if genre_orm:
             await self.session.delete(genre_orm)
             await self.session.commit()
-
-            return genre_orm
-
-        return None

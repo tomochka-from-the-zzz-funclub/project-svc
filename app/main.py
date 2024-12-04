@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from typing import List
 
-from app.domain.models.Genre import Genre
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.domain.models.Film import Film
+from app.domain.models.Genre import Genre
+from app.infrastructure.db.CreateSession import get_session
 from app.use_cases.FilmService import FilmService
 from app.use_cases.GenreService import GenreService
-from app.infrastructure.db.CreateSession import get_session
 
 app = FastAPI()
 
@@ -43,11 +43,11 @@ async def delete_genre(genre_name: str, session: AsyncSession = Depends(get_sess
 
 # Роуты для работы с фильмами
 
-@app.post("/films/", response_model=Film)
+@app.post("/films/", response_model=int)
 async def create_film(film: Film, genres_name: List[str], session: AsyncSession = Depends(get_session)):
     film_service = FilmService(session)
     film_id = await film_service.create_film(film, genres_name)
-    return Film(id=film_id, title=film.title, description=film.description, creation_date=film.creation_date, file_link=film.file_link)
+    return film_id
 
 @app.get("/films/", response_model=List[Film])
 async def get_all_films(session: AsyncSession = Depends(get_session)):

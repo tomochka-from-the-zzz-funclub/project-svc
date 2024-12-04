@@ -94,19 +94,26 @@ class FilmRepository:
 
     async def update_film(self, film_id: int, updated_film: Film) -> Optional[FilmORM]:
         """
-        Обновляет данные о фильме.
+        Updates film details.
 
-        :param film_id: ID фильма, который нужно обновить.
-        :param updated_film: Обновленный объект Film.
-        :return: Обновленный объект FilmORM, если фильм найден и обновлен, или None.
+        :param film_id: ID of the film to update.
+        :param updated_film: Updated Film object.
+        :return: Updated FilmORM object if the film is found and updated, or None.
         """
         film_orm = await self.get_film_by_id(film_id)
 
         if film_orm:
-            film_orm.title = updated_film.title
-            film_orm.description = updated_film.description
-            film_orm.creation_date = updated_film.creation_date
-            film_orm.file_link = updated_film.file_link
+            if updated_film.title:
+                film_orm.title = updated_film.title
+
+            if updated_film.description:
+                film_orm.description = updated_film.description
+
+            if updated_film.creation_date:
+                film_orm.creation_date = updated_film.creation_date
+
+            if updated_film.file_link:
+                film_orm.file_link = updated_film.file_link
 
             await self.session.commit()
 
@@ -114,7 +121,7 @@ class FilmRepository:
 
         return None
 
-    async def delete_film(self, film_id: int) -> Optional[FilmORM]:
+    async def delete_film(self, film_id: int) -> None:
         """
         Удаляет фильм по ID.
 
@@ -126,7 +133,3 @@ class FilmRepository:
         if film_orm:
             await self.session.delete(film_orm)
             await self.session.commit()
-
-            return film_orm
-
-        return None

@@ -59,14 +59,18 @@ class FilmService:
             genre_orm = await self.genre_repository.get_genre_by_name(name)
             await self.film_genres_repository.remove_genre_from_film(film_orm.id, genre_orm.id)
 
-
     async def get_all_films(self) -> List[Film]:
         """
-        Получает все фильмы из базы данных.
-        :return: Список объектов FilmORM.
+        Получает все фильмы из базы данных с полными данными (включая жанры).
+        :return: Список объектов Film.
         """
+        # Получаем все фильмы
         films_orm = await self.film_repository.get_all_films()
-        films = [Film(id=f.id, title=f.title, description=f.description, creation_date=f.creation_date, file_link=f.file_link) for f in films_orm]
+
+        films = []
+        for film_orm in films_orm:
+            film_data = await self.get_film_data(film_orm.title)
+            films.append(film_data)
 
         return films
 
@@ -78,7 +82,8 @@ class FilmService:
         :return: Объект Film с жанрами.
         """
         film_orm = await self.film_repository.get_film_by_title(film_name)
-        genres = [Genre(id=g.id, name=g.name) for g in film_orm.genres]
+        genre_orm = await self.film_genres_repository.get_genres_by_film_id(film_orm.id)
+        genres = [Genre(id=g.id, name=g.name) for g in genre_orm]
 
         return Film(
             id=film_orm.id,
@@ -98,7 +103,7 @@ class FilmService:
         """
         genre_orm = await self.genre_repository.get_genre_by_name(genre_name)
         films_orm = await self.film_genres_repository.get_films_by_genre_id(genre_orm.id)
-        films = [Film(id=f.id, title=f.title, description=f.description, creation_date=f.creation_date, file_link=f.file_link) for f in films_orm]
+        films = [await self.get_film_data(f.title) for f in films_orm]
 
         return films
 
@@ -120,7 +125,6 @@ class FilmService:
             description=updated_film_orm.description,
             creation_date=updated_film_orm.creation_date,
             file_link=updated_film_orm.file_link,
-            genres=[Genre(id=g.id, name=g.name) for g in updated_film_orm.genres],
         )
 
     async def delete_film(self, film_name: str) -> None:
