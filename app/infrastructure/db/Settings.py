@@ -1,13 +1,20 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from app.infrastructure.db.Settings import settings
 
 class Settings(BaseSettings):
+    # Параметры для базы данных
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
     DB_USER: str
     DB_PASSWORD: str
+
+    # Параметры для S3
+    S3_BUCKET_NAME: str
+    S3_ACCESS_KEY: str
+    S3_SECRET_KEY: str
+    S3_REGION_NAME: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
