@@ -3,6 +3,9 @@ from botocore.exceptions import NoCredentialsError
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 
+from app.infrastructure.db.Settings import settings
+
+
 def get_s3_client():
     """Создает и возвращает клиента S3."""
     return boto3.client(

@@ -8,6 +8,7 @@ from starlette.responses import StreamingResponse
 from app.domain.models.Film import Film
 from app.domain.models.Genre import Genre
 from app.infrastructure.db.CreateSession import get_session
+from app.infrastructure.db.Settings import settings
 from app.use_cases.FilmService import FilmService
 from app.use_cases.GenreService import GenreService
 

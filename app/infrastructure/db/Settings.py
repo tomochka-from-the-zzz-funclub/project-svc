@@ -1,6 +1,5 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from app.infrastructure.db.Settings import settings
 
 class Settings(BaseSettings):
     # Параметры для базы данных
