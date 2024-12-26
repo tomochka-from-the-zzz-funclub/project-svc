@@ -1,8 +1,9 @@
+import os
 from typing import List
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.infrastructure.db.MinioClient import get_video_from_s3
+from app.infrastructure.db.MinioClient import get_video_from_s3, upload_to_s3
 from starlette.responses import StreamingResponse
 
 from app.domain.models.Film import Film
@@ -113,3 +114,30 @@ async def stream_video(video_name: str):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/upload/")
+async def upload_file(file: UploadFile = File(...), bucket_name: str = "your-bucket-name"):
+    """
+    Эндпоинт для загрузки файла на S3 (MinIO).
+
+    :param file: Файл, который будет загружен.
+    :param bucket_name: Название бакета для загрузки.
+    :return: Ответ с успешным сообщением.
+    """
+    try:
+        # Сохраняем файл локально
+        file_location = f"temp/{file.filename}"
+        with open(file_location, "wb") as f:
+            f.write(file.file.read())
+
+        # Загружаем файл на S3
+        upload_to_s3(file_location, bucket_name, file.filename)
+
+        # Удаляем временный файл
+        os.remove(file_location)
+
+        return {"message": f"File '{file.filename}' uploaded successfully to bucket '{bucket_name}'."}
+
+    except Exception as e:
+        return {"error": f"An error occurred: {str(e)}"}
