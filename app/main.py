@@ -13,6 +13,8 @@ from app.infrastructure.db.Settings import settings
 from app.use_cases.FilmService import FilmService
 from app.use_cases.GenreService import GenreService
 
+
+
 app = FastAPI()
 
 @app.post("/genres/", response_model=Genre)
@@ -141,3 +143,10 @@ async def upload_file(file: UploadFile = File(...), bucket_name: str = "your-buc
 
     except Exception as e:
         return {"error": f"An error occurred: {str(e)}"}
+
+
+
+
+
+
+
